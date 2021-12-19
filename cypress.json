@@ -1,0 +1,5 @@
+{
+    "bbaseUrl": "http://localhost:3000",
+    "chromeWebSecurity": false,
+    "integrationFolder": "./specs/features"
+}
