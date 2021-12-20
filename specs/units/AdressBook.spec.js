@@ -1,9 +1,10 @@
+const { expect } = require("chai");
 const AddressBook = require("../../src/js/AddressBook");
 
-describe.only("AddressBook", () => {
+describe("AddressBook", () => {
   afterEach(() => {
-    window.localStorage.data = {}
-    sinon.reset()
+    window.localStorage.data = {};
+    sinon.reset();
   });
   subject(() => new AddressBook());
 
@@ -24,12 +25,15 @@ describe.only("AddressBook", () => {
   stringifySpy = sinon.spy(JSON, "stringify");
   parseSpy = sinon.spy(JSON, "parse");
   describe("#create", () => {
-    def("contactsInStorage", () => JSON.parse(window.localStorage.data.entries));
+    def("contactsInStorage", () =>
+      JSON.parse(window.localStorage.data.entries)
+    );
     def("validData", {
       name: "John Doe",
       email: "john@mail.com",
       phone: "1234567",
     });
+    def("invalidData", "this is NOT an object");
 
     context("with valid data", () => {
       beforeEach(() => {
@@ -52,13 +56,47 @@ describe.only("AddressBook", () => {
         expect(stringifySpy).to.have.been.calledOnce;
       });
 
-      it('is expected to add an entry to localStorage', () => {
-        expect($contactsInStorage).to.have.length(1)
+      it("is expected to add an entry to localStorage", () => {
+        expect($contactsInStorage).to.have.length(1);
       });
 
-      it('is expected to respond with a success message', () => {
-        expect(message).to.equal("The entry was added to the address book")
+      it("is expected to respond with a success message", () => {
+        expect(message).to.equal("The entry was added to the address book");
+      });
+    });
+    context("with invalid data", () => {
+      beforeEach(() => {
+        message = $subject.create($invalidData);
+      });
+
+      it('is expected to respond with error message', () => {
+        expect(message).to.equal("We could not process your entry")
+      });
+    });
+
+    describe("#index", () => {
+      let collection;
+      beforeEach(() => {
+        $subject.create({ name: "Karlis" });
+        $subject.create({ name: "Peteris" });
+        $subject.create({ name: "Martins" });
+        sinon.reset()
+        collection = $subject.index();
+      });
+
+      it("is expected to call on localStorage.getItem()", () => {
+        expect(getItemSpy).to.have.been.calledOnce
+      });
+
+      it("is expected to call on JSON.parse()", () => {
+        expect(parseSpy).to.have.been.calledOnce
+      });
+
+      it('is expected to return an array with 3 objects', () => {
+        expect(collection).to.have.be.instanceOf(Array).and.have.length(3);
       });
     });
   });
 });
+
+
